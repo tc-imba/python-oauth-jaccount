@@ -12,6 +12,7 @@ setup(
     packages=['oauthjaccount'],
     include_package_data=True,
     install_requires=[
-        'oauthlib'
+        'oauthlib',
+        'PyJWT'
     ]
 )

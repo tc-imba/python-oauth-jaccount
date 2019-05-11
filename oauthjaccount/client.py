@@ -1,14 +1,14 @@
-from copy import copy
 from urllib.parse import urlencode
 from urllib.request import urlopen, Request
 from json import loads
+from jwt import decode
 
-from oauthlib.oauth2.rfc6749.parameters import prepare_grant_uri, \
-    prepare_token_request
-from oauthlib.oauth2 import Client
+# from oauthlib.oauth2.rfc6749.parameters import prepare_grant_uri, \
+#     prepare_token_request
+from oauthlib.oauth2 import WebApplicationClient
 
 
-class JaccountClient(Client):
+class JaccountClient(WebApplicationClient):
     """A client utilizing the jaccount grant workflow."""
 
     __default_config = {
@@ -32,50 +32,49 @@ class JaccountClient(Client):
         self.api_host = kwargs.get('api_host', 'https://api.sjtu.edu.cn/')
         self.profile_path = kwargs.get('profile_path', 'v1/me/profile')
 
-    def prepare_request_uri(self, uri, redirect_uri=None, scope=None,
-                            state=None, **kwargs):
-        """Prepare the jaccount request URI"""
-        if 'response_type' not in kwargs:
-            kwargs['response_type'] = 'code'
-        return prepare_grant_uri(uri, self.client_id,
-                                 redirect_uri=redirect_uri, scope=scope,
-                                 state=state, **kwargs)
+    # def prepare_request_uri(self, uri, redirect_uri=None, scope=None,
+    #                         state=None, **kwargs):
+    #     """Prepare the jaccount request URI"""
+    #     if 'response_type' not in kwargs:
+    #         kwargs['response_type'] = 'code'
+    #     return prepare_grant_uri(uri, self.client_id,
+    #                              redirect_uri=redirect_uri, scope=scope,
+    #                              state=state, **kwargs)
+    #
+    # def prepare_request_body(self, code=None, redirect_uri=None, body='',
+    #                          include_client_id=True,
+    #                          grant_type='authorization_code',
+    #                          **kwargs):
+    #     """Prepare the access token request body."""
+    #     code = code or self.code
+    #     if 'client_id' in kwargs and kwargs['client_id'] != self.client_id:
+    #         raise ValueError("`client_id` was supplied as an argument, but "
+    #                          "it does not match `self.client_id`")
+    #
+    #     kwargs['client_id'] = self.client_id
+    #     kwargs['include_client_id'] = include_client_id
+    #     return prepare_token_request(grant_type, code=code, body=body,
+    #                                  redirect_uri=redirect_uri, **kwargs)
+    #
+    # def prepare_authorization_implicit(self, redirect_url, scope='basic',
+    #                                    **kwargs):
+    #     authorization_url = self.host + self.authorize_path
+    #     url = self.prepare_authorization_request(
+    #         authorization_url=authorization_url,
+    #         redirect_url=redirect_url,
+    #         response_type='token',
+    #         scope=scope,
+    #         client_secret=self.client_secret,
+    #         **kwargs
+    #     )
+    #     state = self.state
+    #     return url[0], state
 
-    def prepare_request_body(self, code=None, redirect_uri=None, body='',
-                             include_client_id=True,
-                             grant_type='authorization_code',
-                             **kwargs):
-        """Prepare the access token request body."""
-        code = code or self.code
-        if 'client_id' in kwargs and kwargs['client_id'] != self.client_id:
-            raise ValueError("`client_id` was supplied as an argument, but "
-                             "it does not match `self.client_id`")
-
-        kwargs['client_id'] = self.client_id
-        kwargs['include_client_id'] = include_client_id
-        return prepare_token_request(grant_type, code=code, body=body,
-                                     redirect_uri=redirect_uri, **kwargs)
-
-    def prepare_authorization_implicit(self, redirect_url, scope='basic',
-                                       **kwargs):
+    def get_authorize_url(self, redirect_url, **kwargs):
         authorization_url = self.host + self.authorize_path
         url = self.prepare_authorization_request(
             authorization_url=authorization_url,
             redirect_url=redirect_url,
-            response_type='token',
-            scope=scope,
-            client_secret=self.client_secret,
-            **kwargs
-        )
-        state = self.state
-        return url[0], state
-
-    def get_authorize_url(self, redirect_url, scope='basic', **kwargs):
-        authorization_url = self.host + self.authorize_path
-        url = self.prepare_authorization_request(
-            authorization_url=authorization_url,
-            redirect_url=redirect_url,
-            scope=scope,
             **kwargs
         )
         state = self.state
@@ -102,8 +101,8 @@ class JaccountClient(Client):
         req = Request(url, headers=headers, data=body.encode('utf-8'))
         res = urlopen(req).read()
         result = loads(res.decode('utf-8'))
-        print(result)
-        return result['access_token'], result['refresh_token']
+        id_token = decode(result['id_token'], verify=False)
+        return result['access_token'], result['refresh_token'], id_token
 
     def get_refresh_token_url(self, refresh_token, redirect_url):
         token_url = self.host + self.access_token_path
@@ -122,7 +121,8 @@ class JaccountClient(Client):
         req = Request(url, headers=headers, data=body.encode('utf-8'))
         res = urlopen(req).read()
         result = loads(res.decode('utf-8'))
-        return result['access_token'], result['refresh_token']
+        id_token = decode(result['id_token'], verify=False)
+        return result['access_token'], result['refresh_token'], id_token
 
     def get_profile_url(self, access_token):
         params = urlencode({
