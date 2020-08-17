@@ -7,9 +7,9 @@ tc-imba <liuyh615@sjtu.edu.cn>
 from setuptools import setup
 
 setup(
-    name='oauthjaccount',
+    name='oauth_jaccount',
     version='0.1.0',
-    packages=['oauthjaccount'],
+    packages=['oauth_jaccount'],
     include_package_data=True,
     install_requires=[
         'oauthlib',

@@ -1,0 +1,1 @@
+from oauth_jaccount.client import JaccountClient
