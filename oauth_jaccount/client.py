@@ -37,7 +37,7 @@ class JaccountClient(WebApplicationClient):
     def get_logout_url(self, redirect_url):
         params = urlencode({'post_logout_redirect_uri': redirect_url})
         return '%s%s?%s' % (self.host,
-                            self.authorize_path,
+                            self.logout_path,
                             params)
 
     def get_token_url(self, code, redirect_url, **kwargs):
