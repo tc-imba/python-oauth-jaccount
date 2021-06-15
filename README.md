@@ -60,9 +60,12 @@ def jaccount_auth(state: str, code: str):
     #   type: str  # jaccount type (student/faculty/alumni)
     # }
     
-    # Usually id_token is enough for your application
+    # usually id_token is enough for your application
     # If you want to call other jaccount apis, you can use
-    result = client.call_rest_api(access_token, "/v1/me/profile")
+    result = client.call_rest_api(access_token, JaccountClient.API.PROFILE)
+    # most jaccount id/secret can only access a limited range of apis (e.g., API.PROFILE)
+    # the API list in JaccountClient.API is copied from an old version of jaccount documentation
+    # they are not guaranteed to work properly in the future
     
     return redirect("url after login")
 
