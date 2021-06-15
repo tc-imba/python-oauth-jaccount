@@ -11,7 +11,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='oauth_jaccount',
-    version='0.1.2',
+    version='0.1.3',
     author="tc-imba",
     author_email="liuyh615@126.com",
     description="python package for jaccount oauth",
