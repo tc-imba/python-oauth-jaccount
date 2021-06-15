@@ -52,7 +52,7 @@ class JaccountClient(WebApplicationClient):
         req = Request(url, headers=headers, data=body.encode("utf-8"))
         res = urlopen(req).read()
         result = loads(res.decode("utf-8"))
-        id_token = decode(result["id_token"], options={"verify_signature": False})
+        id_token = decode(result["id_token"], verify=False, options={"verify_signature": False})
         return result["access_token"], result["refresh_token"], id_token
 
     def get_refresh_token_url(self, refresh_token, redirect_url, **kwargs):
