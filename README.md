@@ -1,5 +1,7 @@
 # python-oauth-jaccount
 
+[![PyPI version](https://badge.fury.io/py/oauth-jaccount.svg)](https://badge.fury.io/py/oauth-jaccount)
+
 ## Installation
 
 ```bash
